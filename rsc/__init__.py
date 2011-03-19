@@ -179,6 +179,8 @@ def main(args=sys.argv[1:]):
 
     dump_reservable(reservables, user)
 
+    logout(opener)
+
     if previous is None:
         previous = set()
 
