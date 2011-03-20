@@ -189,7 +189,8 @@ def main(args=sys.argv[1:]):
 
     diff = now - prevs
 
-    diff = now
+    print 'now', ', '.join(sorted(now))
+    print 'prevs', ', '.join(sorted(prevs))
 
     if not diff:
         return
