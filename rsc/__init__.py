@@ -188,17 +188,25 @@ def main(args=sys.argv[1:]):
     now = set([x.make_info(False) for x in reservables])
 
     diff = now - prevs
+    removed = prevs - now
+
 
     print 'now', ', '.join(sorted(now))
     print 'prevs', ', '.join(sorted(prevs))
 
-    if not diff:
-        return
+    if diff:
+        msg = u'空車枠が追加されました: ' + ', '.join(sorted(diff)[:5])
 
-    msg = u'空車枠が追加されました: ' + ', '.join(sorted(diff)[:5])
-
-    print msg
+        print msg
     
-    api.send_direct_message(screen_name=sendto,
-                            text=msg)
+        api.send_direct_message(screen_name=sendto,
+                                text=msg)
+
+    if removed:
+        msg = u'空車枠が埋まりました: ' + ', '.join(sorted(removed)[:5])
+
+        print msg
+    
+        api.send_direct_message(screen_name=sendto,
+                                text=msg)        
 
