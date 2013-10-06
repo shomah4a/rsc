@@ -16,6 +16,13 @@ DUMP_FILE = '/tmp/rsc_%s.dump'
 
 
 
+def o(*s):
+
+    for i in s:
+        print s.encode('utf-8')
+
+
+
 def makeparser():
 
     o = optparse.Option
@@ -50,8 +57,8 @@ class Reservable(object):
     def make_info(self, time=True):
 
         if time:
-            return '%s %s時限目(%s)' % (self.day, self.time, self.start)
-        return '%s %s時限目' % (self.day, self.time)
+            return u'%s %s時限目(%s)' % (self.day, self.time, self.start)
+        return u'%s %s時限目' % (self.day, self.time)
 
 
 
@@ -98,7 +105,7 @@ def parse_html(txt):
 
     times = [x.text_content() for x in table.findall('./tr')[1].findall('td')]
 
-    inputs = table.findall('.//input[@src="/images/kusya.gif"]') + table.findall('.//input[@src="../images/kusya.gif"]')
+    inputs = table.findall('.//input[@src="/images/ko2_kusya.gif"]') + table.findall('.//input[@src="../images/ko2_kusya.gif"]')
 
     return [Reservable(days, times, x.get('name')) for x in inputs]
 
@@ -118,7 +125,7 @@ def make_opener():
 
 def login(opener, usr, passwd):
 
-    url = 'http://125.206.214.179/scripts/mtr0010.asp'
+    url = 'http://125.206.214.67/scripts/mtr0010.asp'
 
     opener.open(url).read()
 
@@ -133,7 +140,7 @@ def login(opener, usr, passwd):
 
 def get_reservation_schedule(opener):
 
-    url = 'http://125.206.214.179/scripts/mtr1010.asp'
+    url = 'http://125.206.214.67/scripts/mtr1010.asp'
 
     parm = {'mtr1010.x':'140',
             'mtr1010.y':'25'}
@@ -144,7 +151,7 @@ def get_reservation_schedule(opener):
 
 def logout(opener):
 
-    url = 'http://125.206.214.179/scripts/mtr0020.asp'
+    url = 'http://125.206.214.67/scripts/mtr0020.asp'
 
     parm = {'logout.x':'38',
             'logout.y':'19'}
@@ -191,22 +198,22 @@ def main(args=sys.argv[1:]):
     removed = prevs - now
 
 
-    print 'now', ', '.join(sorted(now))
-    print 'prevs', ', '.join(sorted(prevs))
+    print u'now', ', '.join(sorted(now))
+    print u'prevs', ', '.join(sorted(prevs))
 
     if diff:
-        msg = u'空車枠が追加されました: ' + ', '.join(sorted(diff)[:5])
+        msg = u'空車枠が追加されました: ' + u', '.join(sorted(diff)[:5])
 
         print msg
-    
+
         api.send_direct_message(screen_name=sendto,
                                 text=msg)
 
     if removed:
-        msg = u'空車枠が埋まりました: ' + ', '.join(sorted(removed)[:5])
+        msg = u'空車枠が埋まりました: ' + u', '.join(sorted(removed)[:5])
 
         print msg
-    
+
         api.send_direct_message(screen_name=sendto,
-                                text=msg)        
+                                text=msg)
 
