@@ -8,6 +8,7 @@ import urllib2
 import cookielib
 import StringIO
 import pickle
+import time
 
 from lxml import html
 
@@ -15,11 +16,33 @@ from lxml import html
 DUMP_FILE = '/tmp/rsc_%s.dump'
 
 
+def o(*args):
 
-def o(*s):
+    for arg in args:
 
-    for i in s:
-        print s.encode('utf-8')
+        if isinstance(arg, unicode):
+            print arg.encode('utf-8'),
+        else:
+            print arg,
+
+    print
+
+
+def sleep(n):
+
+    def decorator(f):
+
+        def call(*args, **argd):
+
+            result = f(*args, **argd)
+
+            time.sleep(n)
+
+            return result
+
+        return call
+
+    return decorator
 
 
 
@@ -122,7 +145,7 @@ def make_opener():
     return opener
 
 
-
+@sleep(1)
 def login(opener, usr, passwd):
 
     url = 'http://125.206.214.67/scripts/mtr0010.asp'
@@ -137,18 +160,22 @@ def login(opener, usr, passwd):
     return opener.open(url, urllib.urlencode(parm)).read()
 
 
-
-def get_reservation_schedule(opener):
+@sleep(1)
+def get_reservation_schedule(opener, nextpage=False):
 
     url = 'http://125.206.214.67/scripts/mtr1010.asp'
 
     parm = {'mtr1010.x':'140',
             'mtr1010.y':'25'}
 
+    if nextpage:
+        parm['next.x'] = '10'
+        parm['next.y'] = '10'
+
     return parse_html(opener.open(url, urllib.urlencode(parm)).read())
 
 
-
+@sleep(1)
 def logout(opener):
 
     url = 'http://125.206.214.67/scripts/mtr0020.asp'
@@ -182,7 +209,7 @@ def main(args=sys.argv[1:]):
 
     login(opener, user, passwd)
 
-    reservables = get_reservation_schedule(opener)
+    reservables = get_reservation_schedule(opener) + get_reservation_schedule(opener, True)
 
     dump_reservable(reservables, user)
 
@@ -198,13 +225,13 @@ def main(args=sys.argv[1:]):
     removed = prevs - now
 
 
-    print u'now', ', '.join(sorted(now))
-    print u'prevs', ', '.join(sorted(prevs))
+    o(u'now', ', '.join(sorted(now)))
+    o(u'prevs', ', '.join(sorted(prevs)))
 
     if diff:
         msg = u'空車枠が追加されました: ' + u', '.join(sorted(diff)[:5])
 
-        print msg
+        o(msg)
 
         api.send_direct_message(screen_name=sendto,
                                 text=msg)
@@ -212,7 +239,7 @@ def main(args=sys.argv[1:]):
     if removed:
         msg = u'空車枠が埋まりました: ' + u', '.join(sorted(removed)[:5])
 
-        print msg
+        o(msg)
 
         api.send_direct_message(screen_name=sendto,
                                 text=msg)
